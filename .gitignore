@@ -30,4 +30,6 @@ Thumbs.db
 # Generated exports (examples)
 *.stl
 *.png
-!docs/**/*.png
+# ...but keep documentation screenshots
+!docs/
+!docs/*.png

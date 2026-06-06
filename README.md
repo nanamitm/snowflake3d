@@ -4,6 +4,12 @@
 
 [necocen/snowflake](https://github.com/necocen/snowflake)（Rust + Bevy）にインスパイアされた、Qt6 / C++ による独立実装です。
 
+![Stellar dendrite (2D)](docs/01_stellar_2d.png)
+
+| 2D 樹枝 (fern) | 3D 樹枝 | 3D 厚板樹枝 |
+|:---:|:---:|:---:|
+| ![fern](docs/02_fern_2d.png) | ![3D dendrite](docs/03_dendrite_3d.png) | ![3D thick](docs/04_thick_3d.png) |
+
 ---
 
 ## 特徴
@@ -17,6 +23,8 @@
   - D6h 厳密対称化により大サイズでも 6 回対称 + 鏡映対称を維持
 - **氷マテリアル + IBL** — 透過屈折・クリアコート・手続き生成のスタジオ環境マップ
 - **プリセット** — Simple plate / Sectored plate / Stellar dendrite / Fernlike など
+- **初期条件（シード）** — Point / Hexagon / Ring / Star(6 腕) ＋ サイズ調整
+- **格子の自動拡張** — 結晶が端に達したら格子を広げて成長を継続（状態保持）
 - **エクスポート** — STL（3D プリント）/ PNG / パラメータ JSON 保存・読込
 - **OpenMP 並列化** — シミュレーションのステップを並列実行（8 スレッドで約 3.5 倍）
 
@@ -114,6 +122,15 @@ snowflake3d/
 
 `tests/test_core.cpp` は Qt 非依存のコアを検証します（成長量・6 回対称性・メッシュ削減率）。
 `scripts/run-tests.ps1` でビルド・実行できます。
+
+## スクリーンショット生成
+
+アプリは `--shot` キャプチャモードを備えており、決まった形状を再現可能に書き出せます。
+```
+Snowflake3D --shot out.png [--mode 2d|3d] [--model 0|1] [--preset N]
+                           [--steps K] [--tilt deg] [--cam dist]
+```
+README 用の一式は `scripts/generate-docs.ps1` で生成します。
 
 ---
 

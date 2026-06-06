@@ -11,6 +11,10 @@ ApplicationWindow {
     height: 860
     visible: true
     property bool mode3d: false
+    // --- スクリーンショット用 ---
+    property bool hidePanel: false  // 操作パネルを隠す
+    property real sceneTilt: 0      // 視点の傾き(度)
+    property real camDistance: 650  // カメラ距離
     title: mode3d ? "Snowflake 3D — full 3D crystal"
                   : "Snowflake 3D — " + sim.modelNames[sim.modelIndex]
 
@@ -20,34 +24,37 @@ ApplicationWindow {
         anchors.fill: parent
 
         environment: SceneEnvironment {
-            backgroundMode: SceneEnvironment.SkyBox
-            lightProbe: Texture { source: "image://env/studio" }
-            probeExposure: 1.1
-            probeHorizon: 0.2
+            backgroundMode: SceneEnvironment.Color
+            clearColor: "#16263f"                       // 背景(深い青)
+            lightProbe: Texture { source: "image://env/studio" } // IBL 反射
+            probeExposure: 1.4
             antialiasingMode: SceneEnvironment.MSAA
             antialiasingQuality: SceneEnvironment.High
         }
 
         Node {
             id: originNode
-            PerspectiveCamera { id: camera; z: 650; clipFar: 100000; clipNear: 1 }
+            eulerRotation.x: win.sceneTilt
+            PerspectiveCamera { id: camera; z: win.camDistance; clipFar: 100000; clipNear: 1 }
         }
 
-        DirectionalLight { eulerRotation.x: -35; eulerRotation.y: -45; brightness: 0.7 }
+        DirectionalLight { eulerRotation.x: -35; eulerRotation.y: -45; brightness: 1.3 }
+        DirectionalLight { eulerRotation.x: 30; eulerRotation.y: 160; brightness: 0.6; color: "#bcd4ff" }
+        DirectionalLight { eulerRotation.x: -88; brightness: 0.7 } // 上面を起こす光
 
         // 氷マテリアル(2D/3D 共有)
         PrincipledMaterial {
             id: iceMaterial
-            baseColor: "#eaf6ff"
+            baseColor: "#dcefff"
             metalness: 0.0
-            roughness: 0.10
+            roughness: 0.12
             specularAmount: 1.0
             clearcoatAmount: 1.0
             clearcoatRoughnessAmount: 0.10
-            transmissionFactor: 0.85
+            transmissionFactor: 0.55
             thicknessFactor: 6.0
-            attenuationColor: "#cfe8ff"
-            attenuationDistance: 120.0
+            attenuationColor: "#bfe3ff"
+            attenuationDistance: 90.0
             indexOfRefraction: 1.31
         }
 
@@ -68,6 +75,7 @@ ApplicationWindow {
 
     // ===== 操作パネル =====
     Frame {
+        visible: !win.hidePanel
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
