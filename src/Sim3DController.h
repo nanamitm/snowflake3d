@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QQuick3DGeometry>
+#include <QQuick3DInstancing>
 #include <QStringList>
 #include <QTimer>
 #include <QVariantList>
@@ -9,12 +9,12 @@
 #include <vector>
 
 class Crystal3DModel;
-class Voxel3DGeometry;
+class Voxel3DInstancing;
 
 // 3D 結晶(Reiter3D / GG3D)を駆動し QML へ公開する。
 class Sim3DController : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QQuick3DGeometry *geometry READ geometryObject CONSTANT)
+    Q_PROPERTY(QQuick3DInstancing *instancing READ instancingObject CONSTANT)
     Q_PROPERTY(QStringList modelNames READ modelNames CONSTANT)
     Q_PROPERTY(int modelIndex READ modelIndex WRITE setModelIndex NOTIFY modelChanged)
     Q_PROPERTY(QVariantList params READ params NOTIFY modelChanged)
@@ -33,7 +33,7 @@ public:
     explicit Sim3DController(QObject *parent = nullptr);
     ~Sim3DController() override;
 
-    QQuick3DGeometry *geometryObject() const;
+    QQuick3DInstancing *instancingObject() const;
     QStringList modelNames() const;
     int modelIndex() const { return modelIndex_; }
     QVariantList params() const;
@@ -77,7 +77,7 @@ private:
 
     std::vector<std::unique_ptr<Crystal3DModel>> models_;
     int modelIndex_ = 0;
-    std::unique_ptr<Voxel3DGeometry> geometry_;
+    std::unique_ptr<Voxel3DInstancing> instancing_;
     QTimer timer_;
     int speed_ = 2;
     bool autoExpand_ = true;

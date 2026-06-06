@@ -58,15 +58,16 @@ ApplicationWindow {
             indexOfRefraction: 1.31
         }
 
-        Model {              // 2D (高さフィールド)
+        Model {              // 2D (高さフィールド、インスタンシング)
             visible: !win.mode3d
-            geometry: sim.geometry
+            geometry: hexPrism
+            instancing: sim.instancing
             materials: iceMaterial
         }
-        Model {              // 完全 3D (ボクセル)
+        Model {              // 完全 3D (ボクセル、インスタンシング)
             visible: win.mode3d
-            geometry: sim3d.geometry
-            scale: Qt.vector3d(3, 3, 3)
+            geometry: hexPrism
+            instancing: sim3d.instancing
             materials: iceMaterial
         }
 

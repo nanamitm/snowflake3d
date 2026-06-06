@@ -15,14 +15,16 @@ qt_add_executable(Snowflake3D
     src/main.cpp
     src/SimController.cpp
     src/SimController.h
-    src/SnowflakeGeometry.cpp
-    src/SnowflakeGeometry.h
     src/EnvProvider.h
     src/MeshBuilder.h
+    src/HexPrismGeometry.cpp
+    src/HexPrismGeometry.h
+    src/SnowflakeInstancing.cpp
+    src/SnowflakeInstancing.h
     src/Sim3DController.cpp
     src/Sim3DController.h
-    src/Voxel3DGeometry.cpp
-    src/Voxel3DGeometry.h
+    src/Voxel3DInstancing.cpp
+    src/Voxel3DInstancing.h
     src/core/CrystalModel.h
     src/core/ReiterModel.cpp
     src/core/ReiterModel.h

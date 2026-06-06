@@ -7,6 +7,7 @@
 #include <QTimer>
 
 #include "EnvProvider.h"
+#include "HexPrismGeometry.h"
 #include "Sim3DController.h"
 #include "SimController.h"
 
@@ -23,11 +24,13 @@ int main(int argc, char *argv[]) {
 
     SimController sim;
     Sim3DController sim3d;
+    HexPrismGeometry hexPrism; // インスタンシングの基本メッシュ
 
     QQmlApplicationEngine engine;
     engine.addImageProvider("env", new EnvProvider); // IBL 環境マップ(所有権は engine)
     engine.rootContext()->setContextProperty("sim", &sim);
     engine.rootContext()->setContextProperty("sim3d", &sim3d);
+    engine.rootContext()->setContextProperty("hexPrism", &hexPrism);
     engine.loadFromModule("Snowflake3D", "Main");
 
     if (engine.rootObjects().isEmpty())

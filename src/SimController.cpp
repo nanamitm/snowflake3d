@@ -1,7 +1,7 @@
 #include "SimController.h"
 
 #include "MeshBuilder.h"
-#include "SnowflakeGeometry.h"
+#include "SnowflakeInstancing.h"
 #include "core/GravnerGriffeathModel.h"
 #include "core/ReiterModel.h"
 
@@ -14,10 +14,11 @@
 #include <vector>
 
 SimController::SimController(QObject *parent)
-    : QObject(parent), geometry_(std::make_unique<SnowflakeGeometry>()) {
+    : QObject(parent), instancing_(std::make_unique<SnowflakeInstancing>()) {
     constexpr int kRadius = 160;
     models_.push_back(std::make_unique<ReiterModel>(kRadius));
     models_.push_back(std::make_unique<GravnerGriffeathModel>(kRadius));
+    instancing_->setModel(model());
 
     timer_.setInterval(33); // ~30 fps
     connect(&timer_, &QTimer::timeout, this, &SimController::advance);
@@ -30,8 +31,8 @@ CrystalModel *SimController::model() const {
     return models_[modelIndex_].get();
 }
 
-QQuick3DGeometry *SimController::geometryObject() const {
-    return geometry_.get();
+QQuick3DInstancing *SimController::instancingObject() const {
+    return instancing_.get();
 }
 
 QStringList SimController::modelNames() const {
@@ -66,7 +67,7 @@ QStringList SimController::presetNames() const {
     return names;
 }
 
-double SimController::thickness() const { return geometry_->heightScale; }
+double SimController::thickness() const { return instancing_->heightScale; }
 
 int SimController::stepCount() const {
     return static_cast<int>(model()->stepCount());
@@ -78,6 +79,7 @@ void SimController::setModelIndex(int i) {
     const bool wasRunning = timer_.isActive();
     timer_.stop();
     modelIndex_ = i;
+    instancing_->setModel(model());
     model()->reset();
     refreshMesh();
     emit modelChanged();
@@ -87,8 +89,8 @@ void SimController::setModelIndex(int i) {
 }
 
 void SimController::setThickness(double v) {
-    if (geometry_->heightScale == v) return;
-    geometry_->heightScale = v;
+    if (instancing_->heightScale == v) return;
+    instancing_->heightScale = v;
     emit thicknessChanged();
     refreshMesh();
 }
@@ -198,7 +200,7 @@ bool SimController::atBoundary() const {
 }
 
 void SimController::refreshMesh() {
-    geometry_->rebuild(*model());
+    instancing_->refresh();
 }
 
 bool SimController::saveConfig(const QUrl &fileUrl) {
@@ -208,7 +210,7 @@ bool SimController::saveConfig(const QUrl &fileUrl) {
     QJsonObject root;
     root["model"] = QString::fromUtf8(model()->name());
     root["modelIndex"] = modelIndex_;
-    root["thickness"] = geometry_->heightScale;
+    root["thickness"] = instancing_->heightScale;
     root["speed"] = speed_;
 
     QJsonObject params;
@@ -250,7 +252,7 @@ bool SimController::loadConfig(const QUrl &fileUrl) {
     }
 
     if (root.contains("thickness"))
-        geometry_->heightScale = root.value("thickness").toDouble(geometry_->heightScale);
+        instancing_->heightScale = root.value("thickness").toDouble(instancing_->heightScale);
     if (root.contains("speed"))
         speed_ = std::max(1, root.value("speed").toInt(speed_));
 
@@ -270,7 +272,7 @@ bool SimController::exportStl(const QUrl &fileUrl) {
 
     struct Tri { QVector3D a, b, c; };
     std::vector<Tri> tris;
-    buildSnowflakeMesh(*model(), geometry_->cellSize, geometry_->heightScale,
+    buildSnowflakeMesh(*model(), instancing_->cellSize, instancing_->heightScale,
                        [&](const QVector3D &a, const QVector3D &b,
                            const QVector3D &c) { tris.push_back({a, b, c}); });
 

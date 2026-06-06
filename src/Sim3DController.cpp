@@ -1,6 +1,6 @@
 #include "Sim3DController.h"
 
-#include "Voxel3DGeometry.h"
+#include "Voxel3DInstancing.h"
 #include "core/GravnerGriffeath3DModel.h"
 #include "core/Reiter3DModel.h"
 
@@ -8,9 +8,10 @@
 #include <algorithm>
 
 Sim3DController::Sim3DController(QObject *parent)
-    : QObject(parent), geometry_(std::make_unique<Voxel3DGeometry>()) {
+    : QObject(parent), instancing_(std::make_unique<Voxel3DInstancing>()) {
     models_.push_back(std::make_unique<Reiter3DModel>(48, 49));
     models_.push_back(std::make_unique<GravnerGriffeath3DModel>(60, 41));
+    instancing_->setModel(model());
 
     timer_.setInterval(40);
     connect(&timer_, &QTimer::timeout, this, &Sim3DController::advance);
@@ -23,8 +24,8 @@ Crystal3DModel *Sim3DController::model() const {
     return models_[modelIndex_].get();
 }
 
-QQuick3DGeometry *Sim3DController::geometryObject() const {
-    return geometry_.get();
+QQuick3DInstancing *Sim3DController::instancingObject() const {
+    return instancing_.get();
 }
 
 QStringList Sim3DController::modelNames() const {
@@ -69,6 +70,7 @@ void Sim3DController::setModelIndex(int i) {
     const bool wasRunning = timer_.isActive();
     timer_.stop();
     modelIndex_ = i;
+    instancing_->setModel(model());
     model()->reset();
     refreshMesh();
     emit modelChanged();
@@ -171,5 +173,5 @@ bool Sim3DController::atBoundary() const {
     return model()->grownRadius() >= static_cast<int>(model()->radius() * 0.94);
 }
 void Sim3DController::refreshMesh() {
-    geometry_->rebuild(*model());
+    instancing_->refresh();
 }

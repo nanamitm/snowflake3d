@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QQuick3DGeometry>
+#include <QQuick3DInstancing>
 #include <QStringList>
 #include <QTimer>
 #include <QUrl>
@@ -10,13 +10,13 @@
 #include <vector>
 
 class CrystalModel;
-class SnowflakeGeometry;
+class SnowflakeInstancing;
 
 // シミュレーションを駆動し、QML へモデル/パラメータ/状態を公開する。
 // 複数のモデル(Reiter / Gravner-Griffeath)を切り替えられる。
 class SimController : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QQuick3DGeometry *geometry READ geometryObject CONSTANT)
+    Q_PROPERTY(QQuick3DInstancing *instancing READ instancingObject CONSTANT)
     Q_PROPERTY(QStringList modelNames READ modelNames CONSTANT)
     Q_PROPERTY(int modelIndex READ modelIndex WRITE setModelIndex NOTIFY modelChanged)
     Q_PROPERTY(QVariantList params READ params NOTIFY modelChanged)
@@ -36,7 +36,7 @@ public:
     explicit SimController(QObject *parent = nullptr);
     ~SimController() override;
 
-    QQuick3DGeometry *geometryObject() const;
+    QQuick3DInstancing *instancingObject() const;
     QStringList modelNames() const;
     int modelIndex() const { return modelIndex_; }
     QVariantList params() const;
@@ -86,7 +86,7 @@ private:
 
     std::vector<std::unique_ptr<CrystalModel>> models_;
     int modelIndex_ = 0;
-    std::unique_ptr<SnowflakeGeometry> geometry_;
+    std::unique_ptr<SnowflakeInstancing> instancing_;
     QTimer timer_;
     int speed_ = 4;
     bool autoExpand_ = true;
