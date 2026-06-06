@@ -41,7 +41,7 @@ qt_add_executable(Snowflake3D
 target_include_directories(Snowflake3D PRIVATE src)
 
 qt_add_qml_module(Snowflake3D
-    URI Snowflake3D
+    URI SnowflakeApp   # 実行ファイル名 Snowflake3D とモジュール用ディレクトリの衝突を避ける(Linux)
     VERSION 1.0
     QML_FILES
         qml/Main.qml

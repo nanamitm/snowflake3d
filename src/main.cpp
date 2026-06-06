@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("sim", &sim);
     engine.rootContext()->setContextProperty("sim3d", &sim3d);
     engine.rootContext()->setContextProperty("hexPrism", &hexPrism);
-    engine.loadFromModule("Snowflake3D", "Main");
+    engine.loadFromModule("SnowflakeApp", "Main");
 
     if (engine.rootObjects().isEmpty())
         return -1;
