@@ -1,5 +1,7 @@
 # Snowflake 3D
 
+[![Release](https://github.com/nanamitm/snowflake3d/actions/workflows/release.yml/badge.svg)](https://github.com/nanamitm/snowflake3d/actions/workflows/release.yml)
+
 雪の結晶の成長をセルオートマトンでシミュレーションし、**Qt Quick 3D** で任意方向から観察できるデスクトップアプリです。2.5D の高さフィールドと、完全 3D のボクセル結晶の両方に対応します。
 
 [necocen/snowflake](https://github.com/necocen/snowflake)（Rust + Bevy）にインスパイアされた、Qt6 / C++ による独立実装です。
@@ -43,6 +45,18 @@
 - **OpenMP**（任意・あれば自動で並列化）
 
 開発・検証は Windows 11 + Qt 6.11.1 + MinGW 13 で実施。
+
+---
+
+## ダウンロード（リリース）
+
+[Releases](https://github.com/nanamitm/snowflake3d/releases) からビルド済みバイナリを入手できます。
+
+- **Windows**: `Snowflake3D-windows-x64.zip`（展開して `Snowflake3D.exe` を実行）
+- **Linux**: `Snowflake3D-linux-x86_64.AppImage`（実行権限を付けて起動）
+
+リリースは `vX.Y.Z` 形式のタグを push すると GitHub Actions が自動でビルド・添付します
+（`.github/workflows/release.yml`）。
 
 ---
 

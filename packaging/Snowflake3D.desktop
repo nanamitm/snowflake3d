@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Snowflake 3D
+GenericName=Snow Crystal Growth Simulator
+Comment=Simulate and view snow crystal growth in 2.5D and full 3D
+Exec=Snowflake3D
+Icon=Snowflake3D
+Categories=Science;Education;Graphics;
+Terminal=false
