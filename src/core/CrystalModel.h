@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdlib>
 #include <string>
 #include <vector>
@@ -34,6 +35,7 @@ public:
     // セル状態
     virtual bool frozen(int qi, int ri) const = 0;       // 結晶(付着)か
     virtual double heightAt(int qi, int ri) const = 0;   // 厚み係数 0..1
+    virtual int grownRadius() const = 0;                 // 現在の最大六角半径
 
     // パラメータ
     virtual std::vector<ParamSpec> params() const = 0;
@@ -48,7 +50,9 @@ public:
 class HexLattice : public CrystalModel {
 public:
     explicit HexLattice(int radius)
-        : R_(radius), D_(2 * (radius + 1) + 1), c_(radius + 1) {}
+        : R_(radius), D_(2 * (radius + 1) + 1), c_(radius + 1) {
+        buildCanonMap();
+    }
 
     int radius() const override { return R_; }
     int diameter() const override { return D_; }
@@ -60,9 +64,26 @@ public:
 
     int index(int qi, int ri) const { return ri * D_ + qi; }
 
+    // 現在の結晶の最大六角半径(frozen セルの中心からの最大距離)。stepCount でキャッシュ。
+    int grownRadius() const override {
+        if (radiusCacheStep_ == steps_) return radiusCache_;
+        int mx = 0;
+        for (int ri = 0; ri < D_; ++ri)
+            for (int qi = 0; qi < D_; ++qi)
+                if (frozen(qi, ri)) {
+                    const int d = hexDistance(qi - c_, ri - c_);
+                    if (d > mx) mx = d;
+                }
+        radiusCache_ = mx;
+        radiusCacheStep_ = steps_;
+        return mx;
+    }
+
 protected:
     int R_, D_, c_;
     long long steps_ = 0;
+    mutable int radiusCache_ = 0;
+    mutable long long radiusCacheStep_ = -1;
 
     static int hexDistance(int dq, int dr) {
         return (std::abs(dq) + std::abs(dr) + std::abs(dq + dr)) / 2;
@@ -71,4 +92,38 @@ protected:
     // 軸座標での 6 近傍オフセット
     static constexpr int dqN_[6] = {+1, -1, 0, 0, +1, -1};
     static constexpr int drN_[6] = {0, 0, +1, -1, -1, +1};
+
+    // ---- D6 対称化(2D) ----
+    // 各セルの正準代表(12 個の回転・鏡映像の最小 index)を事前計算し、
+    // 正準値をブロードキャストして樹枝成長の微小な非対称(FP 順序差)を打ち消す。
+    std::vector<int> canon_; // size D_*D_
+
+    void buildCanonMap() {
+        canon_.assign(static_cast<size_t>(D_) * D_, 0);
+        for (int ri = 0; ri < D_; ++ri)
+            for (int qi = 0; qi < D_; ++qi) {
+                const int dq0 = qi - c_, dr0 = ri - c_;
+                int best = ri * D_ + qi;
+                for (int refl = 0; refl < 2; ++refl) {
+                    int dq = refl ? dr0 : dq0;
+                    int dr = refl ? dq0 : dr0; // 鏡映 (dq,dr)->(dr,dq)
+                    for (int rot = 0; rot < 6; ++rot) {
+                        const int aq = dq + c_, ar = dr + c_;
+                        if (aq >= 0 && aq < D_ && ar >= 0 && ar < D_)
+                            best = std::min(best, ar * D_ + aq);
+                        const int ndq = -dr, ndr = dq + dr; // 60° 回転
+                        dq = ndq; dr = ndr;
+                    }
+                }
+                canon_[ri * D_ + qi] = best;
+            }
+    }
+
+    // フィールドを D6 対称に強制する。
+    template <class T>
+    void symmetrizeField(std::vector<T> &f) const {
+        const int n = D_ * D_;
+        for (int p = 0; p < n; ++p)
+            f[p] = f[canon_[p]];
+    }
 };

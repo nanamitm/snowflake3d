@@ -40,6 +40,7 @@ public:
     double mu = 0.015;     // 融解: 境界質量
     double gam = 0.0001;   // 融解: 結晶質量
     double sigma = 0.0;    // 拡散質量ノイズ
+    bool enforceSymmetry = true; // D6 対称を各ステップで強制(大サイズの非対称を防ぐ)
 
 private:
     std::vector<char> a_;        // 付着フラグ

@@ -140,6 +140,14 @@ void GravnerGriffeathModel::step() {
             }
     }
 
+    // ===== D6 対称化 =====
+    if (enforceSymmetry) {
+        symmetrizeField(a_);
+        symmetrizeField(b_);
+        symmetrizeField(cm_);
+        symmetrizeField(d_);
+    }
+
     ++steps_;
 }
 

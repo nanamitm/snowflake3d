@@ -97,6 +97,10 @@ ApplicationWindow {
                 spacing: 8
 
                 Label { text: "Step: " + sim.stepCount; color: "white"; font.pixelSize: 18; font.bold: true }
+                Label {
+                    text: "Growth: " + sim.growthPercent + "%" + (sim.atBoundary ? "  — 格子端に到達(自動停止)" : "")
+                    color: sim.atBoundary ? "#ffcf6b" : "#9fb3d1"; font.pixelSize: 12
+                }
 
                 Label { text: "Model"; color: "#9fb3d1"; font.pixelSize: 12 }
                 ComboBox {
@@ -175,6 +179,10 @@ ApplicationWindow {
                 spacing: 8
 
                 Label { text: "Step: " + sim3d.stepCount; color: "white"; font.pixelSize: 18; font.bold: true }
+                Label {
+                    text: "Growth: " + sim3d.growthPercent + "%" + (sim3d.atBoundary ? "  — 格子端に到達(自動停止)" : "")
+                    color: sim3d.atBoundary ? "#ffcf6b" : "#9fb3d1"; font.pixelSize: 12
+                }
                 Label {
                     Layout.fillWidth: true; wrapMode: Text.WordWrap
                     text: "六角プリズム格子の 3 次元モデル。GG を選ぶと樹枝状に枝分かれします。"

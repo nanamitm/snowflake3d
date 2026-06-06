@@ -115,6 +115,20 @@ void Sim3DController::advance() {
     for (int i = 0; i < speed_; ++i) model()->step();
     refreshMesh();
     emit stepped();
+    if (atBoundary() && timer_.isActive()) {
+        timer_.stop();
+        emit runningChanged();
+    }
+}
+
+int Sim3DController::growthPercent() const {
+    const int R = model()->radius();
+    if (R <= 0) return 0;
+    return std::min(100, model()->grownRadius() * 100 / R);
+}
+
+bool Sim3DController::atBoundary() const {
+    return model()->grownRadius() >= static_cast<int>(model()->radius() * 0.94);
 }
 void Sim3DController::refreshMesh() {
     geometry_->rebuild(*model());

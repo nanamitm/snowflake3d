@@ -140,6 +140,21 @@ void SimController::advance() {
         model()->step();
     refreshMesh();
     emit stepped();
+    // 結晶が格子端に達したら自動停止(端での反射リザーバによる不自然な成長を防ぐ)
+    if (atBoundary() && timer_.isActive()) {
+        timer_.stop();
+        emit runningChanged();
+    }
+}
+
+int SimController::growthPercent() const {
+    const int R = model()->radius();
+    if (R <= 0) return 0;
+    return std::min(100, model()->grownRadius() * 100 / R);
+}
+
+bool SimController::atBoundary() const {
+    return model()->grownRadius() >= static_cast<int>(model()->radius() * 0.94);
 }
 
 void SimController::refreshMesh() {

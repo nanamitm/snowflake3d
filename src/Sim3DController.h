@@ -22,6 +22,8 @@ class Sim3DController : public QObject {
     Q_PROPERTY(bool running READ running NOTIFY runningChanged)
     Q_PROPERTY(int stepCount READ stepCount NOTIFY stepped)
     Q_PROPERTY(int speed READ speed WRITE setSpeed NOTIFY speedChanged)
+    Q_PROPERTY(int growthPercent READ growthPercent NOTIFY stepped)
+    Q_PROPERTY(bool atBoundary READ atBoundary NOTIFY stepped)
 
 public:
     explicit Sim3DController(QObject *parent = nullptr);
@@ -35,6 +37,8 @@ public:
     bool running() const { return timer_.isActive(); }
     int stepCount() const;
     int speed() const { return speed_; }
+    int growthPercent() const;
+    bool atBoundary() const;
 
     void setModelIndex(int i);
     void setSpeed(int v);

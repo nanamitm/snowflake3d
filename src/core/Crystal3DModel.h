@@ -25,6 +25,7 @@ public:
     virtual long long stepCount() const = 0;
     virtual bool inHex(int dq, int dr) const = 0;
     virtual bool frozen(int qi, int ri, int z) const = 0;
+    virtual int grownRadius() const = 0; // 現在の面内最大六角半径
 
     virtual std::vector<ParamSpec> params() const = 0;
     virtual void setParam(int index, double v) = 0;
@@ -52,9 +53,27 @@ public:
     }
     int index(int qi, int ri, int z) const { return (z * D_ + ri) * D_ + qi; }
 
+    // 現在の結晶の面内最大六角半径。stepCount でキャッシュ。
+    int grownRadius() const override {
+        if (radiusCacheStep_ == steps_) return radiusCache_;
+        int mx = 0;
+        for (int z = 0; z < Hz_; ++z)
+            for (int ri = 0; ri < D_; ++ri)
+                for (int qi = 0; qi < D_; ++qi)
+                    if (frozen(qi, ri, z)) {
+                        const int d = hexDistance(qi - c_, ri - c_);
+                        if (d > mx) mx = d;
+                    }
+        radiusCache_ = mx;
+        radiusCacheStep_ = steps_;
+        return mx;
+    }
+
 protected:
     int R_, D_, c_, Hz_, zc_;
     long long steps_ = 0;
+    mutable int radiusCache_ = 0;
+    mutable long long radiusCacheStep_ = -1;
 
     static int hexDistance(int dq, int dr) {
         return (std::abs(dq) + std::abs(dr) + std::abs(dq + dr)) / 2;
