@@ -56,3 +56,8 @@ target_link_libraries(Snowflake3D PRIVATE
 if(OpenMP_CXX_FOUND)
     target_link_libraries(Snowflake3D PRIVATE OpenMP::OpenMP_CXX)
 endif()
+
+# Windows: GUI サブシステムにしてコンソールウィンドウを出さない
+if(WIN32)
+    set_target_properties(Snowflake3D PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
