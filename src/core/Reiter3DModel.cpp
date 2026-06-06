@@ -15,8 +15,20 @@ Reiter3DModel::Reiter3DModel(int radius, int layers)
 
 void Reiter3DModel::reset() {
     std::fill(s_.begin(), s_.end(), beta);
-    s_[index(c_, c_, zc_)] = 1.0; // 種結晶
+    forEachSeed([&](int dq, int dr) { s_[index(c_ + dq, c_ + dr, zc_)] = 1.0; });
     steps_ = 0;
+    radiusCacheStep_ = -1;
+}
+
+void Reiter3DModel::grow(int newRadius) {
+    const int oldD = D_, oldC = c_;
+    R_ = newRadius; D_ = 2 * (R_ + 1) + 1; c_ = R_ + 1;
+    buildCanonMap();
+    s_ = regrid(s_, oldD, oldC, beta);
+    u_ = regrid(u_, oldD, oldC, 0.0);
+    v_ = regrid(v_, oldD, oldC, 0.0);
+    fast_ = regrid(fast_, oldD, oldC, static_cast<char>(1));
+    radiusCacheStep_ = -1;
 }
 
 void Reiter3DModel::step() {

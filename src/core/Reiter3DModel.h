@@ -19,6 +19,7 @@ public:
         if (z < 0 || z >= Hz_) return false;
         return s_[index(qi, ri, z)] >= 1.0;
     }
+    void grow(int newRadius) override;
 
     std::vector<ParamSpec> params() const override;
     void setParam(int index, double v) override;

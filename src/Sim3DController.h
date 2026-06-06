@@ -24,6 +24,10 @@ class Sim3DController : public QObject {
     Q_PROPERTY(int speed READ speed WRITE setSpeed NOTIFY speedChanged)
     Q_PROPERTY(int growthPercent READ growthPercent NOTIFY stepped)
     Q_PROPERTY(bool atBoundary READ atBoundary NOTIFY stepped)
+    Q_PROPERTY(bool autoExpand READ autoExpand WRITE setAutoExpand NOTIFY autoExpandChanged)
+    Q_PROPERTY(int seedType READ seedType WRITE setSeedType NOTIFY seedChanged)
+    Q_PROPERTY(int seedSize READ seedSize WRITE setSeedSize NOTIFY seedChanged)
+    Q_PROPERTY(QStringList seedNames READ seedNames CONSTANT)
 
 public:
     explicit Sim3DController(QObject *parent = nullptr);
@@ -39,9 +43,16 @@ public:
     int speed() const { return speed_; }
     int growthPercent() const;
     bool atBoundary() const;
+    bool autoExpand() const { return autoExpand_; }
+    int seedType() const;
+    int seedSize() const;
+    QStringList seedNames() const { return {"Point", "Hexagon", "Ring", "Star (6)"}; }
 
     void setModelIndex(int i);
     void setSpeed(int v);
+    void setAutoExpand(bool v);
+    void setSeedType(int v);
+    void setSeedSize(int v);
 
 public slots:
     void start();
@@ -56,6 +67,8 @@ signals:
     void runningChanged();
     void stepped();
     void speedChanged();
+    void autoExpandChanged();
+    void seedChanged();
 
 private:
     void advance();
@@ -67,4 +80,7 @@ private:
     std::unique_ptr<Voxel3DGeometry> geometry_;
     QTimer timer_;
     int speed_ = 2;
+    bool autoExpand_ = true;
+    int capRadius_ = 100;   // 3D は重いので控えめな上限
+    int expandStep_ = 16;
 };

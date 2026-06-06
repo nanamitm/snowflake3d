@@ -26,6 +26,12 @@ public:
     virtual bool inHex(int dq, int dr) const = 0;
     virtual bool frozen(int qi, int ri, int z) const = 0;
     virtual int grownRadius() const = 0; // 現在の面内最大六角半径
+    virtual void grow(int newRadius) = 0; // 面内半径を拡張(状態保持)
+
+    // 初期条件(シード)
+    virtual int seedType() const = 0;
+    virtual int seedSize() const = 0;
+    virtual void setSeed(int type, int size) = 0;
 
     virtual std::vector<ParamSpec> params() const = 0;
     virtual void setParam(int index, double v) = 0;
@@ -53,6 +59,45 @@ public:
     }
     int index(int qi, int ri, int z) const { return (z * D_ + ri) * D_ + qi; }
 
+    // --- シード(初期条件、面内パターンを中心層に配置) ---
+    int seedType() const override { return seedType_; }
+    int seedSize() const override { return seedSize_; }
+    void setSeed(int type, int size) override {
+        seedType_ = type;
+        seedSize_ = std::max(1, size);
+    }
+    template <class Fn>
+    void forEachSeed(Fn &&fn) const {
+        if (seedType_ == 0) { fn(0, 0); return; }
+        if (seedType_ == 3) {
+            fn(0, 0);
+            for (int k = 0; k < 6; ++k)
+                fn(dqN_[k] * seedSize_, drN_[k] * seedSize_);
+            return;
+        }
+        for (int dr = -seedSize_; dr <= seedSize_; ++dr)
+            for (int dq = -seedSize_; dq <= seedSize_; ++dq) {
+                const int hd = hexDistance(dq, dr);
+                if (seedType_ == 1 && hd <= seedSize_) fn(dq, dr);
+                if (seedType_ == 2 && hd == seedSize_) fn(dq, dr);
+            }
+    }
+
+    // 旧状態を新面内半径(R_,D_,c_ 更新済み)の中心へ移送(z はそのまま)。
+    template <class T>
+    std::vector<T> regrid(const std::vector<T> &old, int oldD, int oldC,
+                          T bg) const {
+        std::vector<T> nw(static_cast<size_t>(D_) * D_ * Hz_, bg);
+        const int off = c_ - oldC;
+        for (int z = 0; z < Hz_; ++z)
+            for (int ri = 0; ri < oldD; ++ri)
+                for (int qi = 0; qi < oldD; ++qi)
+                    nw[(static_cast<size_t>(z) * D_ + (ri + off)) * D_ +
+                       (qi + off)] =
+                        old[(static_cast<size_t>(z) * oldD + ri) * oldD + qi];
+        return nw;
+    }
+
     // 現在の結晶の面内最大六角半径。stepCount でキャッシュ。
     int grownRadius() const override {
         if (radiusCacheStep_ == steps_) return radiusCache_;
@@ -72,6 +117,8 @@ public:
 protected:
     int R_, D_, c_, Hz_, zc_;
     long long steps_ = 0;
+    int seedType_ = 0;
+    int seedSize_ = 3;
     mutable int radiusCache_ = 0;
     mutable long long radiusCacheStep_ = -1;
 

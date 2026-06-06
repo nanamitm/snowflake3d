@@ -24,6 +24,7 @@ public:
         return s_[index(qi, ri)] >= 1.0;
     }
     double heightAt(int qi, int ri) const override;
+    void grow(int newRadius) override;
 
     std::vector<ParamSpec> params() const override;
     void setParam(int index, double v) override;

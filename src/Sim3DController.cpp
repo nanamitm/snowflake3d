@@ -5,6 +5,7 @@
 #include "core/Reiter3DModel.h"
 
 #include <QVariantMap>
+#include <algorithm>
 
 Sim3DController::Sim3DController(QObject *parent)
     : QObject(parent), geometry_(std::make_unique<Voxel3DGeometry>()) {
@@ -71,6 +72,7 @@ void Sim3DController::setModelIndex(int i) {
     model()->reset();
     refreshMesh();
     emit modelChanged();
+    emit seedChanged();
     emit stepped();
     if (wasRunning) emit runningChanged();
 }
@@ -113,12 +115,50 @@ void Sim3DController::reset() {
 }
 void Sim3DController::advance() {
     for (int i = 0; i < speed_; ++i) model()->step();
+    bool stopped = false;
+    if (atBoundary()) {
+        const int R = model()->radius();
+        if (autoExpand_ && R < capRadius_)
+            model()->grow(std::min(capRadius_, R + expandStep_));
+        else if (timer_.isActive()) {
+            timer_.stop();
+            stopped = true;
+        }
+    }
     refreshMesh();
     emit stepped();
-    if (atBoundary() && timer_.isActive()) {
-        timer_.stop();
-        emit runningChanged();
-    }
+    if (stopped) emit runningChanged();
+}
+
+void Sim3DController::setAutoExpand(bool v) {
+    if (autoExpand_ == v) return;
+    autoExpand_ = v;
+    emit autoExpandChanged();
+}
+
+int Sim3DController::seedType() const { return model()->seedType(); }
+int Sim3DController::seedSize() const { return model()->seedSize(); }
+
+void Sim3DController::setSeedType(int v) {
+    if (model()->seedType() == v) return;
+    timer_.stop();
+    model()->setSeed(v, model()->seedSize());
+    model()->reset();
+    refreshMesh();
+    emit seedChanged();
+    emit stepped();
+    emit runningChanged();
+}
+
+void Sim3DController::setSeedSize(int v) {
+    if (model()->seedSize() == v) return;
+    timer_.stop();
+    model()->setSeed(model()->seedType(), v);
+    model()->reset();
+    refreshMesh();
+    emit seedChanged();
+    emit stepped();
+    emit runningChanged();
 }
 
 int Sim3DController::growthPercent() const {

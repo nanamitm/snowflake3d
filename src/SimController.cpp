@@ -10,6 +10,7 @@
 #include <QJsonObject>
 #include <QVariantMap>
 #include <QVector3D>
+#include <algorithm>
 #include <vector>
 
 SimController::SimController(QObject *parent)
@@ -80,6 +81,7 @@ void SimController::setModelIndex(int i) {
     model()->reset();
     refreshMesh();
     emit modelChanged();
+    emit seedChanged();
     emit stepped();
     if (wasRunning) emit runningChanged();
 }
@@ -138,13 +140,51 @@ void SimController::reset() {
 void SimController::advance() {
     for (int i = 0; i < speed_; ++i)
         model()->step();
+    // 格子端に達したら自動拡張(または上限で自動停止)
+    bool stopped = false;
+    if (atBoundary()) {
+        const int R = model()->radius();
+        if (autoExpand_ && R < capRadius_)
+            model()->grow(std::min(capRadius_, R + expandStep_));
+        else if (timer_.isActive()) {
+            timer_.stop();
+            stopped = true;
+        }
+    }
     refreshMesh();
     emit stepped();
-    // 結晶が格子端に達したら自動停止(端での反射リザーバによる不自然な成長を防ぐ)
-    if (atBoundary() && timer_.isActive()) {
-        timer_.stop();
-        emit runningChanged();
-    }
+    if (stopped) emit runningChanged();
+}
+
+void SimController::setAutoExpand(bool v) {
+    if (autoExpand_ == v) return;
+    autoExpand_ = v;
+    emit autoExpandChanged();
+}
+
+int SimController::seedType() const { return model()->seedType(); }
+int SimController::seedSize() const { return model()->seedSize(); }
+
+void SimController::setSeedType(int v) {
+    if (model()->seedType() == v) return;
+    timer_.stop();
+    model()->setSeed(v, model()->seedSize());
+    model()->reset();
+    refreshMesh();
+    emit seedChanged();
+    emit stepped();
+    emit runningChanged();
+}
+
+void SimController::setSeedSize(int v) {
+    if (model()->seedSize() == v) return;
+    timer_.stop();
+    model()->setSeed(model()->seedType(), v);
+    model()->reset();
+    refreshMesh();
+    emit seedChanged();
+    emit stepped();
+    emit runningChanged();
 }
 
 int SimController::growthPercent() const {

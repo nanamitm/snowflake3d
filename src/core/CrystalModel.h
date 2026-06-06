@@ -36,6 +36,12 @@ public:
     virtual bool frozen(int qi, int ri) const = 0;       // 結晶(付着)か
     virtual double heightAt(int qi, int ri) const = 0;   // 厚み係数 0..1
     virtual int grownRadius() const = 0;                 // 現在の最大六角半径
+    virtual void grow(int newRadius) = 0;                // 格子半径を拡張(状態保持)
+
+    // 初期条件(シード)
+    virtual int seedType() const = 0;                    // 0:point 1:hex 2:ring 3:star
+    virtual int seedSize() const = 0;
+    virtual void setSeed(int type, int size) = 0;
 
     // パラメータ
     virtual std::vector<ParamSpec> params() const = 0;
@@ -64,6 +70,44 @@ public:
 
     int index(int qi, int ri) const { return ri * D_ + qi; }
 
+    // --- シード(初期条件) ---
+    int seedType() const override { return seedType_; }
+    int seedSize() const override { return seedSize_; }
+    void setSeed(int type, int size) override {
+        seedType_ = type;
+        seedSize_ = std::max(1, size);
+    }
+    // 各シードセルの軸オフセット(dq,dr)を fn に渡す。
+    template <class Fn>
+    void forEachSeed(Fn &&fn) const {
+        if (seedType_ == 0) { fn(0, 0); return; }       // 点
+        if (seedType_ == 3) {                            // 星(6 本腕)
+            fn(0, 0);
+            for (int k = 0; k < 6; ++k)
+                fn(dqN_[k] * seedSize_, drN_[k] * seedSize_);
+            return;
+        }
+        for (int dr = -seedSize_; dr <= seedSize_; ++dr)
+            for (int dq = -seedSize_; dq <= seedSize_; ++dq) {
+                const int hd = hexDistance(dq, dr);
+                if (seedType_ == 1 && hd <= seedSize_) fn(dq, dr); // 六角形
+                if (seedType_ == 2 && hd == seedSize_) fn(dq, dr); // 環
+            }
+    }
+
+    // 旧状態を新半径(呼び出し前に R_,D_,c_ を更新済み)の中心へ移送する。
+    template <class T>
+    std::vector<T> regrid(const std::vector<T> &old, int oldD, int oldC,
+                          T bg) const {
+        std::vector<T> nw(static_cast<size_t>(D_) * D_, bg);
+        const int off = c_ - oldC;
+        for (int ri = 0; ri < oldD; ++ri)
+            for (int qi = 0; qi < oldD; ++qi)
+                nw[static_cast<size_t>(ri + off) * D_ + (qi + off)] =
+                    old[static_cast<size_t>(ri) * oldD + qi];
+        return nw;
+    }
+
     // 現在の結晶の最大六角半径(frozen セルの中心からの最大距離)。stepCount でキャッシュ。
     int grownRadius() const override {
         if (radiusCacheStep_ == steps_) return radiusCache_;
@@ -82,6 +126,8 @@ public:
 protected:
     int R_, D_, c_;
     long long steps_ = 0;
+    int seedType_ = 0;
+    int seedSize_ = 3;
     mutable int radiusCache_ = 0;
     mutable long long radiusCacheStep_ = -1;
 

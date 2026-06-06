@@ -98,7 +98,8 @@ ApplicationWindow {
 
                 Label { text: "Step: " + sim.stepCount; color: "white"; font.pixelSize: 18; font.bold: true }
                 Label {
-                    text: "Growth: " + sim.growthPercent + "%" + (sim.atBoundary ? "  — 格子端に到達(自動停止)" : "")
+                    text: "Growth: " + sim.growthPercent + "%"
+                          + (sim.atBoundary ? (sim.autoExpand ? "  — 格子を自動拡張中" : "  — 上限に到達(停止)") : "")
                     color: sim.atBoundary ? "#ffcf6b" : "#9fb3d1"; font.pixelSize: 12
                 }
 
@@ -108,6 +109,22 @@ ApplicationWindow {
                     model: sim.modelNames
                     currentIndex: sim.modelIndex
                     onActivated: sim.modelIndex = currentIndex
+                }
+
+                // 初期条件(シード) + 自動拡張
+                Label { text: "Seed (初期条件)"; color: "#9fb3d1"; font.pixelSize: 12 }
+                ComboBox {
+                    Layout.fillWidth: true
+                    model: sim.seedNames
+                    currentIndex: sim.seedType
+                    onActivated: sim.seedType = currentIndex
+                }
+                Label { text: "Seed size: " + sim.seedSize; color: "white"; font.pixelSize: 12 }
+                Slider { Layout.fillWidth: true; from: 1; to: 8; value: sim.seedSize; onMoved: sim.seedSize = Math.round(value) }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Label { text: "格子を自動拡張"; color: "white"; font.pixelSize: 12; Layout.fillWidth: true }
+                    Switch { checked: sim.autoExpand; onToggled: sim.autoExpand = checked }
                 }
 
                 RowLayout {
@@ -180,7 +197,8 @@ ApplicationWindow {
 
                 Label { text: "Step: " + sim3d.stepCount; color: "white"; font.pixelSize: 18; font.bold: true }
                 Label {
-                    text: "Growth: " + sim3d.growthPercent + "%" + (sim3d.atBoundary ? "  — 格子端に到達(自動停止)" : "")
+                    text: "Growth: " + sim3d.growthPercent + "%"
+                          + (sim3d.atBoundary ? (sim3d.autoExpand ? "  — 格子を自動拡張中" : "  — 上限に到達(停止)") : "")
                     color: sim3d.atBoundary ? "#ffcf6b" : "#9fb3d1"; font.pixelSize: 12
                 }
                 Label {
@@ -195,6 +213,22 @@ ApplicationWindow {
                     model: sim3d.modelNames
                     currentIndex: sim3d.modelIndex
                     onActivated: sim3d.modelIndex = currentIndex
+                }
+
+                // 初期条件(シード) + 自動拡張
+                Label { text: "Seed (初期条件)"; color: "#9fb3d1"; font.pixelSize: 12 }
+                ComboBox {
+                    Layout.fillWidth: true
+                    model: sim3d.seedNames
+                    currentIndex: sim3d.seedType
+                    onActivated: sim3d.seedType = currentIndex
+                }
+                Label { text: "Seed size: " + sim3d.seedSize; color: "white"; font.pixelSize: 12 }
+                Slider { Layout.fillWidth: true; from: 1; to: 8; value: sim3d.seedSize; onMoved: sim3d.seedSize = Math.round(value) }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Label { text: "格子を自動拡張"; color: "white"; font.pixelSize: 12; Layout.fillWidth: true }
+                    Switch { checked: sim3d.autoExpand; onToggled: sim3d.autoExpand = checked }
                 }
 
                 RowLayout {

@@ -21,11 +21,27 @@ void GravnerGriffeath3DModel::reset() {
     std::fill(b_.begin(), b_.end(), 0.0);
     std::fill(cm_.begin(), cm_.end(), 0.0);
     std::fill(d_.begin(), d_.end(), rho);
-    const int o = index(c_, c_, zc_);
-    a_[o] = 1;
-    cm_[o] = 1.0;
-    d_[o] = 0.0;
+    forEachSeed([&](int dq, int dr) {
+        const int o = index(c_ + dq, c_ + dr, zc_);
+        a_[o] = 1; cm_[o] = 1.0; d_[o] = 0.0;
+    });
     steps_ = 0;
+    radiusCacheStep_ = -1;
+}
+
+void GravnerGriffeath3DModel::grow(int newRadius) {
+    const int oldD = D_, oldC = c_;
+    R_ = newRadius; D_ = 2 * (R_ + 1) + 1; c_ = R_ + 1;
+    buildCanonMap();
+    a_ = regrid(a_, oldD, oldC, static_cast<char>(0));
+    b_ = regrid(b_, oldD, oldC, 0.0);
+    cm_ = regrid(cm_, oldD, oldC, 0.0);
+    d_ = regrid(d_, oldD, oldC, rho);
+    const size_t n = static_cast<size_t>(D_) * D_ * Hz_;
+    dn_.assign(n, 0.0);
+    boundary_.assign(n, 0);
+    attachMask_.assign(n, 0);
+    radiusCacheStep_ = -1;
 }
 
 void GravnerGriffeath3DModel::step() {

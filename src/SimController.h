@@ -27,6 +27,10 @@ class SimController : public QObject {
     Q_PROPERTY(int speed READ speed WRITE setSpeed NOTIFY speedChanged)
     Q_PROPERTY(int growthPercent READ growthPercent NOTIFY stepped)
     Q_PROPERTY(bool atBoundary READ atBoundary NOTIFY stepped)
+    Q_PROPERTY(bool autoExpand READ autoExpand WRITE setAutoExpand NOTIFY autoExpandChanged)
+    Q_PROPERTY(int seedType READ seedType WRITE setSeedType NOTIFY seedChanged)
+    Q_PROPERTY(int seedSize READ seedSize WRITE setSeedSize NOTIFY seedChanged)
+    Q_PROPERTY(QStringList seedNames READ seedNames CONSTANT)
 
 public:
     explicit SimController(QObject *parent = nullptr);
@@ -43,10 +47,17 @@ public:
     int speed() const { return speed_; }
     int growthPercent() const;
     bool atBoundary() const;
+    bool autoExpand() const { return autoExpand_; }
+    int seedType() const;
+    int seedSize() const;
+    QStringList seedNames() const { return {"Point", "Hexagon", "Ring", "Star (6)"}; }
 
     void setModelIndex(int i);
     void setThickness(double v);
     void setSpeed(int stepsPerTick);
+    void setAutoExpand(bool v);
+    void setSeedType(int v);
+    void setSeedSize(int v);
 
 public slots:
     void start();
@@ -64,6 +75,8 @@ signals:
     void runningChanged();
     void stepped();
     void speedChanged();
+    void autoExpandChanged();
+    void seedChanged();
     void thicknessChanged();
 
 private:
@@ -76,4 +89,7 @@ private:
     std::unique_ptr<SnowflakeGeometry> geometry_;
     QTimer timer_;
     int speed_ = 4;
+    bool autoExpand_ = true;
+    int capRadius_ = 360;   // 自動拡張の上限半径
+    int expandStep_ = 60;   // 1 回の拡張量
 };
