@@ -132,6 +132,15 @@ void Sim3DController::advance() {
     if (stopped) emit runningChanged();
 }
 
+int Sim3DController::colorMode() const { return instancing_->colorMode; }
+
+void Sim3DController::setColorMode(int v) {
+    if (instancing_->colorMode == v) return;
+    instancing_->colorMode = v;
+    refreshMesh();
+    emit colorModeChanged();
+}
+
 void Sim3DController::setAutoExpand(bool v) {
     if (autoExpand_ == v) return;
     autoExpand_ = v;

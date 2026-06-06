@@ -16,6 +16,7 @@ public:
 
     double cellSize = 1.0;
     double heightScale = 6.0;
+    int colorMode = 0; // 0:Ice 1:Spectrum 2:Thickness
 
 protected:
     QByteArray getInstanceBuffer(int *instanceCount) override;

@@ -28,6 +28,8 @@ class Sim3DController : public QObject {
     Q_PROPERTY(int seedType READ seedType WRITE setSeedType NOTIFY seedChanged)
     Q_PROPERTY(int seedSize READ seedSize WRITE setSeedSize NOTIFY seedChanged)
     Q_PROPERTY(QStringList seedNames READ seedNames CONSTANT)
+    Q_PROPERTY(int colorMode READ colorMode WRITE setColorMode NOTIFY colorModeChanged)
+    Q_PROPERTY(QStringList colorModeNames READ colorModeNames CONSTANT)
 
 public:
     explicit Sim3DController(QObject *parent = nullptr);
@@ -47,12 +49,15 @@ public:
     int seedType() const;
     int seedSize() const;
     QStringList seedNames() const { return {"Point", "Hexagon", "Ring", "Star (6)"}; }
+    int colorMode() const;
+    QStringList colorModeNames() const { return {"Ice", "Spectrum", "Layers"}; }
 
     void setModelIndex(int i);
     void setSpeed(int v);
     void setAutoExpand(bool v);
     void setSeedType(int v);
     void setSeedSize(int v);
+    void setColorMode(int v);
 
 public slots:
     void start();
@@ -69,6 +74,7 @@ signals:
     void speedChanged();
     void autoExpandChanged();
     void seedChanged();
+    void colorModeChanged();
 
 private:
     void advance();

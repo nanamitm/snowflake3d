@@ -45,7 +45,7 @@ ApplicationWindow {
         // 氷マテリアル(2D/3D 共有)
         PrincipledMaterial {
             id: iceMaterial
-            baseColor: "#dcefff"
+            baseColor: "#ffffff"   // インスタンス色で着色するため白
             metalness: 0.0
             roughness: 0.12
             specularAmount: 1.0
@@ -130,6 +130,13 @@ ApplicationWindow {
                 }
                 Label { text: "Seed size: " + sim.seedSize; color: "white"; font.pixelSize: 12 }
                 Slider { Layout.fillWidth: true; from: 1; to: 8; value: sim.seedSize; onMoved: sim.seedSize = Math.round(value) }
+                Label { text: "Color"; color: "#9fb3d1"; font.pixelSize: 12 }
+                ComboBox {
+                    Layout.fillWidth: true
+                    model: sim.colorModeNames
+                    currentIndex: sim.colorMode
+                    onActivated: sim.colorMode = currentIndex
+                }
                 RowLayout {
                     Layout.fillWidth: true
                     Label { text: "格子を自動拡張"; color: "white"; font.pixelSize: 12; Layout.fillWidth: true }
@@ -234,6 +241,13 @@ ApplicationWindow {
                 }
                 Label { text: "Seed size: " + sim3d.seedSize; color: "white"; font.pixelSize: 12 }
                 Slider { Layout.fillWidth: true; from: 1; to: 8; value: sim3d.seedSize; onMoved: sim3d.seedSize = Math.round(value) }
+                Label { text: "Color"; color: "#9fb3d1"; font.pixelSize: 12 }
+                ComboBox {
+                    Layout.fillWidth: true
+                    model: sim3d.colorModeNames
+                    currentIndex: sim3d.colorMode
+                    onActivated: sim3d.colorMode = currentIndex
+                }
                 RowLayout {
                     Layout.fillWidth: true
                     Label { text: "格子を自動拡張"; color: "white"; font.pixelSize: 12; Layout.fillWidth: true }

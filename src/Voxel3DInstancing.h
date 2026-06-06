@@ -16,6 +16,7 @@ public:
     // 2D の見かけと揃えるため拡大率を内包(旧 Model scale 3 相当)
     double cellSize = 3.0;
     double layerH = 4.5;
+    int colorMode = 0; // 0:Ice 1:Spectrum 2:Thickness(層)
 
 protected:
     QByteArray getInstanceBuffer(int *instanceCount) override;

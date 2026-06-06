@@ -12,10 +12,11 @@ $exe = "$repo/build/Snowflake3D.exe"
 $docs = "$repo/docs"
 New-Item -ItemType Directory -Force $docs | Out-Null
 
-# --shot <out> --mode 2d|3d --model 0|1 --preset N --steps K --tilt deg --cam dist
+# --shot <out> --mode 2d|3d --model 0|1 --preset N --steps K --tilt deg --cam dist --color 0|1|2
 & $exe --shot "$docs/01_stellar_2d.png"  --mode 2d --model 1 --preset 2 --steps 700 --cam 175
 & $exe --shot "$docs/02_fern_2d.png"     --mode 2d --model 1 --preset 3 --steps 850 --cam 250
 & $exe --shot "$docs/03_dendrite_3d.png" --mode 3d --model 1 --preset 0 --steps 400 --tilt 30 --cam 300
 & $exe --shot "$docs/04_thick_3d.png"    --mode 3d --model 1 --preset 3 --steps 360 --tilt 48 --cam 300
+& $exe --shot "$docs/05_spectrum_2d.png" --mode 2d --model 1 --preset 2 --steps 700 --cam 175 --color 1
 
 Get-ChildItem $docs -Filter *.png | Select-Object Name, Length

@@ -10,6 +10,10 @@
 |:---:|:---:|:---:|
 | ![fern](docs/02_fern_2d.png) | ![3D dendrite](docs/03_dendrite_3d.png) | ![3D thick](docs/04_thick_3d.png) |
 
+中心からの成長履歴をスペクトル配色で可視化（Color: Spectrum）:
+
+![Spectrum coloring](docs/05_spectrum_2d.png)
+
 ---
 
 ## 特徴
@@ -25,6 +29,7 @@
 - **プリセット** — Simple plate / Sectored plate / Stellar dendrite / Fernlike など
 - **初期条件（シード）** — Point / Hexagon / Ring / Star(6 腕) ＋ サイズ調整
 - **格子の自動拡張** — 結晶が端に達したら格子を広げて成長を継続（状態保持）
+- **配色** — Ice（単色）/ Spectrum（中心からの放射状レインボー）/ Thickness（厚み・層）
 - **エクスポート** — STL（3D プリント）/ PNG / パラメータ JSON 保存・読込
 - **OpenMP 並列化** — シミュレーションのステップを並列実行（8 スレッドで約 3.5 倍）
 
@@ -128,7 +133,7 @@ snowflake3d/
 アプリは `--shot` キャプチャモードを備えており、決まった形状を再現可能に書き出せます。
 ```
 Snowflake3D --shot out.png [--mode 2d|3d] [--model 0|1] [--preset N]
-                           [--steps K] [--tilt deg] [--cam dist]
+                           [--steps K] [--tilt deg] [--cam dist] [--color 0|1|2]
 ```
 README 用の一式は `scripts/generate-docs.ps1` で生成します。
 

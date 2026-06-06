@@ -17,6 +17,7 @@ qt_add_executable(Snowflake3D
     src/SimController.h
     src/EnvProvider.h
     src/MeshBuilder.h
+    src/InstanceColor.h
     src/HexPrismGeometry.cpp
     src/HexPrismGeometry.h
     src/SnowflakeInstancing.cpp

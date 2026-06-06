@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
         const int steps = argVal(args, "--steps", "600").toInt();
         const qreal tilt = argVal(args, "--tilt", "0").toDouble();
         const qreal cam = argVal(args, "--cam", "650").toDouble();
+        const int color = argVal(args, "--color", "0").toInt();
 
         QObject *root = engine.rootObjects().first();
         QQuickWindow *w = qobject_cast<QQuickWindow *>(root);
@@ -62,12 +63,14 @@ int main(int argc, char *argv[]) {
                 sim.stop();
                 sim3d.setModelIndex(model);
                 sim3d.applyPreset(preset);
+                sim3d.setColorMode(color);
                 for (int i = 0; i < steps; ++i) sim3d.stepOnce();
             } else {
                 root->setProperty("mode3d", false);
                 sim3d.stop();
                 sim.setModelIndex(model);
                 sim.applyPreset(preset);
+                sim.setColorMode(color);
                 for (int i = 0; i < steps; ++i) sim.stepOnce();
             }
             // 数フレーム描画させてからグラブ

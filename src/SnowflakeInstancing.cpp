@@ -1,5 +1,6 @@
 #include "SnowflakeInstancing.h"
 
+#include "InstanceColor.h"
 #include "core/CrystalModel.h"
 
 #include <QColor>
@@ -22,6 +23,8 @@ QByteArray SnowflakeInstancing::getInstanceBuffer(int *instanceCount) {
     const int c = model_->center();
     const double size = cellSize;
     const double sqrt3 = std::sqrt(3.0);
+    const int gr = model_->grownRadius();
+    const double rInv = gr > 0 ? 1.0 / gr : 0.0;
 
     for (int ri = 0; ri < D; ++ri) {
         for (int qi = 0; qi < D; ++qi) {
@@ -34,10 +37,13 @@ QByteArray SnowflakeInstancing::getInstanceBuffer(int *instanceCount) {
             const double hf = model_->heightAt(qi, ri);
             const float h = static_cast<float>(heightScale * (0.35 + 0.65 * hf));
 
+            const int hd = (std::abs(dq) + std::abs(dr) + std::abs(dq + dr)) / 2;
+            const QColor col = crystalColor(colorMode, hd * rInv, hf);
+
             const auto e = calculateTableEntry(
                 QVector3D(cx, cy, 0.0f),
                 QVector3D(static_cast<float>(size), static_cast<float>(size), h),
-                QVector3D(0, 0, 0), Qt::white);
+                QVector3D(0, 0, 0), col);
             buf.append(reinterpret_cast<const char *>(&e), sizeof(e));
             ++count;
         }
