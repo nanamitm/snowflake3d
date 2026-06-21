@@ -17,7 +17,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -45,7 +45,7 @@ jobs:
       - name: Package zip
         run: Compress-Archive -Path dist\* -DestinationPath Snowflake3D-windows-x64.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows
           path: Snowflake3D-windows-x64.zip
@@ -54,7 +54,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install system deps
         run: |
@@ -95,7 +95,7 @@ jobs:
           # 出力(Snowflake...)だけをリネーム(ツールの linuxdeploy*.AppImage は除外)
           mv Snowflake*.AppImage Snowflake3D-linux-x86_64.AppImage
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux
           path: Snowflake3D-linux-x86_64.AppImage
@@ -106,10 +106,10 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             windows/Snowflake3D-windows-x64.zip
