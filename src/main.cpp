@@ -1,4 +1,10 @@
 #include <QGuiApplication>
+
+#ifdef Q_OS_WASM
+#include <QFont>
+#include <QFontDatabase>
+#include <QScreen>
+#endif
 #include <QImage>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -17,9 +23,33 @@ static QString argVal(const QStringList &a, const QString &key,
     return (i >= 0 && i + 1 < a.size()) ? a[i + 1] : def;
 }
 
+#ifdef Q_OS_WASM
+// Qt for WebAssembly は DejaVu しか同梱していないので、そのままでは UI の日本語が
+// 豆腐になる。UI で使う文字だけに絞ったフォントを読み込む
+// (resources/fonts/、tools/subset_font.py で生成)。
+static void loadJapaneseFont(QGuiApplication &app) {
+    const int id = QFontDatabase::addApplicationFont(
+        QStringLiteral(":/fonts/NotoSansJP-subset.ttf"));
+    if (id < 0) {
+        qWarning("failed to load the bundled Japanese font");
+        return;
+    }
+    const QStringList families = QFontDatabase::applicationFontFamilies(id);
+    if (families.isEmpty())
+        return;
+
+    QFont font = app.font();
+    font.setFamily(families.first());
+    app.setFont(font);
+}
+#endif
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName("Snowflake3D");
+#ifdef Q_OS_WASM
+    loadJapaneseFont(app);
+#endif
     QQuickStyle::setStyle("Basic"); // カスタマイズ可能なスタイル
 
     SimController sim;
@@ -35,6 +65,18 @@ int main(int argc, char *argv[]) {
 
     if (engine.rootObjects().isEmpty())
         return -1;
+
+#ifdef Q_OS_WASM
+    // ブラウザの表示領域いっぱいに広げ、リサイズにも追従する
+    // (Qt for WebAssembly はウィンドウを自動では追従させない)。
+    if (auto *win = qobject_cast<QQuickWindow *>(engine.rootObjects().first())) {
+        if (QScreen *screen = app.primaryScreen()) {
+            win->setGeometry(screen->geometry());
+            QObject::connect(screen, &QScreen::geometryChanged, win,
+                             [win](const QRect &g) { win->setGeometry(g); });
+        }
+    }
+#endif
 
     // --- スクリーンショット用キャプチャモード(README/docs 生成) ---
     //   --shot <out.png> [--mode 2d|3d] [--model N] [--preset N]

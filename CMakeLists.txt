@@ -57,6 +57,25 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(Snowflake3D PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
+# ===== WebAssembly 固有 =====
+# シングルスレッド版 Qt でビルドするため OpenMP は無効(計算は逐次実行)。
+# SharedArrayBuffer を使わないので COOP/COEP ヘッダも不要。
+if(EMSCRIPTEN)
+    # Qt wasm は DejaVu しか持たないので、日本語 UI 用のフォントを埋め込む。
+    qt_add_resources(Snowflake3D "fonts"
+        PREFIX "/fonts"
+        BASE resources/fonts
+        FILES resources/fonts/NotoSansJP-subset.ttf
+    )
+
+    set_target_properties(Snowflake3D PROPERTIES
+        QT_WASM_INITIAL_MEMORY "128MB"   # Quick3D + 3D ボクセル格子の分
+    )
+
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/wasm/index.html
+                   ${CMAKE_CURRENT_BINARY_DIR}/index.html COPYONLY)
+endif()
+
 # Windows: GUI サブシステムにしてコンソールウィンドウを出さない
 if(WIN32)
     set_target_properties(Snowflake3D PROPERTIES WIN32_EXECUTABLE TRUE)

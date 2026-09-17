@@ -37,6 +37,45 @@
 
 ---
 
+## Web 版（Qt for WebAssembly）
+
+デスクトップ版と同じアプリを WebAssembly にビルドして GitHub Pages で公開しています：
+**https://nanamitm.github.io/snowflake3d/**
+
+- 2.5D ビューも完全 3D ビューもブラウザ上で動作します（Qt Quick 3D → WebGL 2）
+- 初回ロードは gzip 後で約 10 MB。表示までに十数秒かかることがあります
+- シングルスレッド版 Qt でビルドするため **OpenMP は無効**（計算は逐次実行なので、デスクトップ版よりステップが遅くなります）
+- `SharedArrayBuffer` を使わないので COOP/COEP ヘッダーは不要です
+
+**ビルドに必要なもの**
+
+- Qt 6.11.1 の WebAssembly 版（`wasm_singlethread`）＋同バージョンのホスト Qt
+- Emscripten 4.0.7（この Qt がビルドに使ったバージョン。他は拒否されます）
+
+```bash
+source /path/to/emsdk/emsdk_env.sh
+/path/to/Qt/6.11.1/wasm_singlethread/bin/qt-cmake -S . -B build-wasm   -DCMAKE_BUILD_TYPE=Release   -DQT_HOST_PATH=/path/to/Qt/6.11.1/gcc_64
+cmake --build build-wasm
+python -m http.server 8080 --directory build-wasm   # /index.html を開く
+```
+
+`.github/workflows/pages.yml` が `main` への push でビルドとデプロイを行います。
+公開物は `wasm/make-dist.py` が組み立て、ファイル名に内容ハッシュを付けます
+（GitHub Pages が `Cache-Control: max-age=600` を返すため、新しい `index.html` と
+古い wasm が混ざるのを防ぐため）。
+
+### 日本語フォント
+
+Qt for WebAssembly は DejaVu しか同梱しておらず CJK が豆腐になるため、
+`resources/fonts/NotoSansJP-subset.ttf`（UI で使う約 515 文字だけに絞った
+Noto Sans JP Regular・約 107 KB、SIL Open Font License 1.1）を埋め込んでいます。
+日本語の文言を追加したら再生成してください：
+
+```bash
+python -m pip install fonttools
+python tools/subset_font.py path/to/NotoSansJP.ttf
+```
+
 ## 必要環境
 
 - **Qt 6.5 以上**（Quick / Quick3D / QuickControls2）
