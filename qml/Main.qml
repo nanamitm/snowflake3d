@@ -74,15 +74,21 @@ ApplicationWindow {
         OrbitCameraController { anchors.fill: parent; origin: originNode; camera: camera }
     }
 
+    // 画面が狭いとパネルがビューをほぼ覆ってしまうので、折りたためるようにする。
+    readonly property bool narrow: win.width < 900
+
     // ===== 操作パネル =====
     Frame {
+        id: panelFrame
         visible: !win.hidePanel
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.margins: 12
-        width: 340
+        // スマホ幅では画面からはみ出さないところまで縮める
+        width: Math.min(340, win.width - 24)
         background: Rectangle { color: "#dd141a2b"; radius: 8 }
+        clip: true
 
         ColumnLayout {
             anchors.fill: parent
@@ -318,6 +324,21 @@ ApplicationWindow {
         nameFilters: ["STL files (*.stl)"]
         defaultSuffix: "stl"
         onAccepted: sim.exportStl(selectedFile)
+    }
+
+    // パネルの開閉ボタン（狭い画面のみ）
+    RoundButton {
+        visible: win.narrow
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: 12
+        z: 10
+        width: 44
+        height: 44
+        text: win.hidePanel ? "≡" : "×"   // ≡ で開く / × で閉じる
+        font.pixelSize: 18
+        opacity: 0.9
+        onClicked: win.hidePanel = !win.hidePanel
     }
 
     FileDialog {
