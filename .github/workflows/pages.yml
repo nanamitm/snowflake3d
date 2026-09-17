@@ -44,7 +44,21 @@ jobs:
 
       # The app has no threads, so the single-threaded Qt is enough — no
       # SharedArrayBuffer and therefore no cross-origin isolation needed.
-      # --autodesktop also installs the matching host Qt, needed for moc/rcc.
+      # Quick3D and its shader tools are add-on modules, and the host Qt needs
+      # them too: qsb compiles the shaders at build time.
+      - name: Install Qt (host tools)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host:    linux
+          target:  desktop
+          arch:    linux_gcc_64
+          modules: qtquick3d qtshadertools
+          cache:   true
+
+      - name: Remember the host Qt
+        run: echo "QT_HOST_ROOT=$QT_ROOT_DIR" >> "$GITHUB_ENV"
+
       - name: Install Qt (WebAssembly, single-threaded)
         uses: jurplel/install-qt-action@v4
         with:
@@ -52,7 +66,7 @@ jobs:
           host:    all_os
           target:  wasm
           arch:    wasm_singlethread
-          extra:   --autodesktop
+          modules: qtquick3d qtshadertools
           cache:   true
 
       - name: Configure
@@ -61,7 +75,7 @@ jobs:
           chmod +x "$QT_ROOT_DIR/bin/"* "$QT_ROOT_DIR/libexec/"* || true
           "$QT_ROOT_DIR/bin/qt-cmake" -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DQT_HOST_PATH="$(dirname "$QT_ROOT_DIR")/gcc_64"
+            -DQT_HOST_PATH="$QT_HOST_ROOT"
 
       - name: Build
         run: cmake --build build --parallel
